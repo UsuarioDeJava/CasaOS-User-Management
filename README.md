@@ -73,6 +73,9 @@ and why each attempt failed, e.g. `user 'casaos' is not the configured user
 'UsuarioDeJava' (from ADMIN_USERNAME)` or `wrong password: 9 characters typed,
 the configured one has 10`. Passwords never appear in the log.
 
+CasaOS does not always list `ADMIN_USERNAME` and `ADMIN_PASSWORD` in the same
+order, so they are easy to swap: when that happens, the login page says so.
+
 **Locked out?** Set `RESET_ADMIN` to `true` in the app settings, save (the app
 restarts with the variables' login), sign in, and set it back to `false`.
 

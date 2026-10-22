@@ -124,11 +124,26 @@ class AdminAuth:
         pass_ok = check_password_hash(self.password_hash, password or "")
         return user_ok and pass_ok
 
+    def swapped(self, username, password):
+        """True when the typed login matches ADMIN_USERNAME/ADMIN_PASSWORD
+        with the two values swapped (CasaOS does not always list the variables
+        in the same order, so they are easy to fill in the wrong field)."""
+        if self.source != "env":
+            return False
+        typed_user = (username or "").strip()
+        return (
+            hmac.compare_digest(typed_user.encode(), self.env_password.encode())
+            and hmac.compare_digest((password or "").strip().casefold().encode(),
+                                    self.env_username.casefold().encode())
+        )
+
     def explain_failure(self, username, password):
         """Why a login failed, for the log (never shows a password)."""
         source = ("set in the web UI" if self.source == "web"
                   else "from ADMIN_USERNAME" if self._from_env_user
                   else "the default")
+        if self.swapped(username, password):
+            return "ADMIN_USERNAME and ADMIN_PASSWORD are swapped"
         if not self._user_ok(username):
             return (f"user {(username or '').strip()!r} is not the configured "
                     f"user {self.username!r} ({source})")

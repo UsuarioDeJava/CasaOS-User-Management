@@ -137,7 +137,10 @@ def login():
             log.warning("Failed admin login from %s: %s", client,
                         admin.explain_failure(request.form.get("username"),
                                               request.form.get("password")))
-            error = translate(g.lang, "wrong_login")
+            error = translate(g.lang, "login_swapped"
+                              if admin.swapped(request.form.get("username"),
+                                               request.form.get("password"))
+                              else "wrong_login")
     return render_template("login.html", error=error), (401 if error else 200)
 
 

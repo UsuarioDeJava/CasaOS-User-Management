@@ -125,6 +125,16 @@ def test_failed_login_is_explained_in_the_log(env, caplog):
     assert "errada" not in caplog.text and "segredo" not in caplog.text
 
 
+def test_swapped_variables_are_detected(env, caplog):
+    env["monkeypatch"].setenv("ADMIN_USERNAME", "21102004M")
+    env["monkeypatch"].setenv("ADMIN_PASSWORD", "usuariodejava")
+    client = make_client(env)
+    r = login(client, "usuariodejava", "21102004M")
+    assert r.status_code == 401 and "swapped" in r.get_data(as_text=True)
+    assert "ADMIN_USERNAME and ADMIN_PASSWORD are swapped" in caplog.text
+    assert "swapped" not in login(client, "usuariodejava", "x").get_data(as_text=True)
+
+
 def test_unicode_password(env):
     env["monkeypatch"].setenv("ADMIN_PASSWORD", "café$ção")
     client = make_client(env)

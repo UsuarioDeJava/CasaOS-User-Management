@@ -76,6 +76,9 @@ por que cada tentativa falhou, por exemplo `user 'casaos' is not the configured
 user 'UsuarioDeJava' (from ADMIN_USERNAME)` ou `wrong password: 9 characters
 typed, the configured one has 10`. Senhas nunca aparecem no log.
 
+O CasaOS nem sempre mostra `ADMIN_USERNAME` e `ADMIN_PASSWORD` na mesma ordem,
+então é fácil trocar um pelo outro: quando isso acontece, a página de login avisa.
+
 **Ficou trancado para fora?** Coloque `RESET_ADMIN` como `true` nas
 configurações do app, salve (o app reinicia com o login das variáveis), entre,
 e volte para `false`.
