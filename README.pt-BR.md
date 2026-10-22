@@ -40,8 +40,9 @@ Uma reescrita do [BigBearCasaOS User Management](https://github.com/bigbeartechw
 
 1. Desinstale a versão da BigBear se tiver (as duas usam a porta 5000).
 2. **App Store → Mais apps**, adicione
-   `https://usuariodejava.github.io/casaos-user-management/store.zip` e
-   instale o **Gerenciador de Usuários do CasaOS**.
+   `https://usuariodejava.github.io/CasaOS-User-Management/store.zip` (ela
+   aparece como **CasaOS-User-Management**) e instale o **Gerenciador de
+   Usuários do CasaOS**.
 
    Ou **App Store → Instalação personalizada → Importar**, e cole o
    [`Apps/casaos-user-management/docker-compose.yml`](Apps/casaos-user-management/docker-compose.yml).

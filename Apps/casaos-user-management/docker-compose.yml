@@ -80,7 +80,7 @@ x-casaos:
   category: Utilities
   author: UsuarioDeJava
   developer: UsuarioDeJava
-  icon: https://cdn.jsdelivr.net/gh/UsuarioDeJava/casaos-user-management@main/icon.png
+  icon: https://cdn.jsdelivr.net/gh/UsuarioDeJava/CasaOS-User-Management@main/icon.png
   description:
     en_us: Add, remove and change the password of CasaOS users, from a web page with its own login. Useful when you forgot the CasaOS password. Based on BigBearCasaOS User Management.
     pt_br: Adicione, remova e troque a senha dos usuários do CasaOS, numa página web com login próprio. Útil quando você esqueceu a senha do CasaOS. Baseado no BigBearCasaOS User Management.
