@@ -134,8 +134,9 @@ def login():
             return redirect(target)
         else:
             admin.record_failure(client)
-            log.warning("Failed admin login from %s (user %r)",
-                        client, request.form.get("username"))
+            log.warning("Failed admin login from %s: %s", client,
+                        admin.explain_failure(request.form.get("username"),
+                                              request.form.get("password")))
             error = translate(g.lang, "wrong_login")
     return render_template("login.html", error=error), (401 if error else 200)
 

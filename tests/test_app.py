@@ -107,6 +107,24 @@ def test_env_password_is_cleaned(env, raw):
     assert "casaos / casaos" not in client.get("/").get_data(as_text=True)
 
 
+def test_username_ignores_case(env):
+    env["monkeypatch"].setenv("ADMIN_USERNAME", "UsuarioDeJava")
+    env["monkeypatch"].setenv("ADMIN_PASSWORD", "segredo")
+    client = make_client(env)
+    assert login(client, "usuariodejava", "segredo").status_code == 302
+
+
+def test_failed_login_is_explained_in_the_log(env, caplog):
+    env["monkeypatch"].setenv("ADMIN_USERNAME", "UsuarioDeJava")
+    env["monkeypatch"].setenv("ADMIN_PASSWORD", "segredo")
+    client = make_client(env)
+    login(client, "casaos", "segredo")
+    assert "user 'casaos' is not the configured user 'UsuarioDeJava'" in caplog.text
+    login(client, "usuariodejava", "errada")
+    assert "6 characters typed, the configured one has 7" in caplog.text
+    assert "errada" not in caplog.text and "segredo" not in caplog.text
+
+
 def test_unicode_password(env):
     env["monkeypatch"].setenv("ADMIN_PASSWORD", "café$ção")
     client = make_client(env)

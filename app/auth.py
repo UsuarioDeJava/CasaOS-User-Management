@@ -47,6 +47,7 @@ class AdminAuth:
         self.env_username = _clean(env.get("ADMIN_USERNAME")) or DEFAULT_USERNAME
         self.env_password = _clean(env.get("ADMIN_PASSWORD")) or DEFAULT_PASSWORD
         self._from_env = bool(_clean(env.get("ADMIN_PASSWORD")))
+        self._from_env_user = bool(_clean(env.get("ADMIN_USERNAME")))
         self._env_fp = self._fingerprint(self.env_username, self.env_password)
         self._lock = threading.Lock()
         self._failures = {}
@@ -113,11 +114,29 @@ class AdminAuth:
             return self._env_fp[:16]
         return self._fingerprint(self.username, self.password_hash)[:16]
 
+    def _user_ok(self, username):
+        # Case-insensitive: "UsuarioDeJava" and "usuariodejava" are the same.
+        typed = (username or "").strip().casefold().encode()
+        return hmac.compare_digest(typed, self.username.casefold().encode())
+
     def check(self, username, password):
-        username = (username or "").strip()
-        user_ok = hmac.compare_digest(username.encode(), self.username.encode())
+        user_ok = self._user_ok(username)
         pass_ok = check_password_hash(self.password_hash, password or "")
         return user_ok and pass_ok
+
+    def explain_failure(self, username, password):
+        """Why a login failed, for the log (never shows a password)."""
+        source = ("set in the web UI" if self.source == "web"
+                  else "from ADMIN_USERNAME" if self._from_env_user
+                  else "the default")
+        if not self._user_ok(username):
+            return (f"user {(username or '').strip()!r} is not the configured "
+                    f"user {self.username!r} ({source})")
+        typed = len(password or "")
+        if self.source == "env":
+            return (f"wrong password: {typed} characters typed, the configured "
+                    f"one has {len(self.env_password)}")
+        return f"wrong password ({typed} characters typed)"
 
     def change(self, username, password):
         username = username.strip()

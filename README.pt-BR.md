@@ -68,6 +68,14 @@ Não é uma conta do CasaOS. Ele vem de, nesta ordem:
 A alteração mais recente vale: se você editar as variáveis no CasaOS depois de
 trocar o login na página, as variáveis passam a valer.
 
+O usuário não diferencia maiúsculas de minúsculas; a senha diferencia.
+
+**Login recusado?** O log do app (CasaOS: configurações do app → *Logs*, ou
+`docker logs casaos-user-management`) diz qual login está valendo ao iniciar e
+por que cada tentativa falhou, por exemplo `user 'casaos' is not the configured
+user 'UsuarioDeJava' (from ADMIN_USERNAME)` ou `wrong password: 9 characters
+typed, the configured one has 10`. Senhas nunca aparecem no log.
+
 **Ficou trancado para fora?** Coloque `RESET_ADMIN` como `true` nas
 configurações do app, salve (o app reinicia com o login das variáveis), entre,
 e volte para `false`.

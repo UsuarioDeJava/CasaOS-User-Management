@@ -65,6 +65,14 @@ It is not a CasaOS account. It comes from, in order:
 The most recent change wins: if you edit the variables in CasaOS after
 changing the login in the page, the variables are used from then on.
 
+The username ignores upper/lower case; the password does not.
+
+**Login refused?** The app's log (CasaOS: app settings → *Logs*, or
+`docker logs casaos-user-management`) says which login is in use at startup
+and why each attempt failed, e.g. `user 'casaos' is not the configured user
+'UsuarioDeJava' (from ADMIN_USERNAME)` or `wrong password: 9 characters typed,
+the configured one has 10`. Passwords never appear in the log.
+
 **Locked out?** Set `RESET_ADMIN` to `true` in the app settings, save (the app
 restarts with the variables' login), sign in, and set it back to `false`.
 
