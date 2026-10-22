@@ -6,8 +6,14 @@ Uma página web para adicionar, remover e trocar a senha dos usuários do
 [CasaOS](https://casaos.io), com login próprio. Útil quando você esqueceu a
 senha do CasaOS.
 
-Uma reescrita do [BigBearCasaOS User Management](https://github.com/bigbeartechworld/big-bear-docker-images/tree/main/Apps/big-bear-casaos-user-management)
-(que por sua vez é baseado no [casaos-user-management](https://github.com/carlbomsdata/casaos-user-management)).
+> [!NOTE]
+> **Este é um fork apenas do [BigBearCasaOS User Management](https://github.com/bigbeartechworld/big-bear-docker-images/tree/main/Apps/big-bear-casaos-user-management).**
+> Esse app é uma única pasta (`Apps/big-bear-casaos-user-management`) do
+> repositório [big-bear-docker-images](https://github.com/bigbeartechworld/big-bear-docker-images), que tem muitas outras imagens,
+> então não dá para fazer fork só dele no GitHub. Este repositório partiu
+> apenas daquela pasta (versão 0.1.1) e de nada mais do big-bear-docker-images.
+> O original por sua vez é baseado no [casaos-user-management](https://github.com/carlbomsdata/casaos-user-management).
+> Sem afiliação com a BigBearTechWorld.
 
 ## O que mudou em relação à versão da BigBear
 

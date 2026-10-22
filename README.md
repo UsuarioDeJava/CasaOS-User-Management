@@ -5,8 +5,14 @@
 A web page to add, remove and change the password of [CasaOS](https://casaos.io)
 users, with its own login. Useful when you forgot the CasaOS password.
 
-A rewrite of [BigBearCasaOS User Management](https://github.com/bigbeartechworld/big-bear-docker-images/tree/main/Apps/big-bear-casaos-user-management)
-(itself based on [casaos-user-management](https://github.com/carlbomsdata/casaos-user-management)).
+> [!NOTE]
+> **This is a fork of [BigBearCasaOS User Management](https://github.com/bigbeartechworld/big-bear-docker-images/tree/main/Apps/big-bear-casaos-user-management) only.**
+> That app is a single folder (`Apps/big-bear-casaos-user-management`) of the
+> [big-bear-docker-images](https://github.com/bigbeartechworld/big-bear-docker-images) repository, which holds many other images, so
+> it cannot be forked on GitHub by itself. This repository started from that
+> folder alone (version 0.1.1) and nothing else from big-bear-docker-images.
+> The original is itself based on [casaos-user-management](https://github.com/carlbomsdata/casaos-user-management).
+> Not affiliated with BigBearTechWorld.
 
 ## What changed from the BigBear version
 
