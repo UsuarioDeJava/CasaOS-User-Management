@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />{% endmacro %}
+
+{% macro password_fields(new_label) %}
+<label class="grid gap-2 text-sm font-medium">
+  {{ new_label }}
+  <input class="field" type="password" name="password" autocomplete="new-password" required />
+</label>
+<label class="grid gap-2 text-sm font-medium">
+  {{ t('confirm_password') }}
+  <input class="field" type="password" name="confirm_password" autocomplete="new-password" required />
+</label>
+{% endmacro %}
+
+{% macro dialog_footer(submit_label, icon) %}
+<div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t border-border pt-4">
+  <button type="button" class="btn btn-outline" data-close>{{ t('cancel') }}</button>
+  <button type="submit" class="btn btn-primary"><i class="fas {{ icon }}"></i> {{ submit_label }}</button>
+</div>
+{% endmacro %}
+
+{% block content %}
+{% if admin.is_default %}
+<div role="alert" class="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+  <i class="fas fa-triangle-exclamation text-warning"></i>
+  <span class="flex-1">{{ t('default_login') }}</span>
+  <button type="button" class="btn btn-outline h-8" data-open="adminDialog">{{ t('change_it') }}</button>
+</div>
+{% endif %}
+
+{% if db_error %}
+<div role="alert" class="mb-6 flex items-start gap-3 rounded-lg bg-destructive/10 text-destructive px-4 py-3 text-sm">
+  <i class="fas fa-database mt-0.5"></i><span>{{ db_error }}</span>
+</div>
+{% endif %}
+
+<section class="rounded-lg border border-border bg-card shadow-soft overflow-hidden">
+  <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6">
+    <div class="flex-1">
+      <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">{{ t('users') }}</h1>
+      <p class="mt-1 text-sm text-muted-foreground flex items-center gap-2">
+        <span class="inline-block h-2 w-2 rounded-full
+          {{ 'bg-success' if service_state == 'active' else ('bg-warning' if service_state else 'bg-muted-foreground') }}"></span>
+        {{ t('service') }}: {{ t('service_active') if service_state == 'active' else (service_state or t('service_unknown')) }}
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <div class="relative flex-1 sm:w-56">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i>
+        <input id="search" type="search" class="field pl-9" placeholder="{{ t('search') }}" aria-label="{{ t('search') }}" />
+      </div>
+      <button type="button" class="btn btn-primary" data-open="addUserDialog" {{ 'disabled' if db_error }}>
+        <i class="fas fa-plus"></i><span class="hidden sm:inline">{{ t('add_user') }}</span>
+      </button>
+    </div>
+  </div>
+
+  <ul class="border-t border-border divide-y divide-border">
+    {% for user in users %}
+    <li class="user-row flex items-center gap-3 px-4 sm:px-6 py-3" data-search="{{ user.username|lower }} {{ user.id }}">
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <i class="fas fa-user text-xs"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-medium truncate">{{ user.username }}</div>
+        <div class="text-xs text-muted-foreground">ID {{ user.id }}{% if user.role %} · {{ user.role }}{% endif %}</div>
+      </div>
+      <button type="button" class="btn btn-outline btn-icon" data-open="passwordDialog{{ user.id }}"
+              title="{{ t('change_password') }}">
+        <i class="fas fa-key"></i>
+      </button>
+      <form action="{{ url_for('remove_user', user_id=user.id) }}" method="post"
+            data-confirm="{{ t('confirm_remove', username=user.username) }}">
+        {{ csrf() }}
+        <button type="submit" class="btn btn-outline btn-icon hover:text-destructive" title="{{ t('remove') }}"
+                {{ 'disabled' if users|length <= 1 }}>
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </form>
+    </li>
+    {% endfor %}
+    <li id="no-users" class="px-6 py-8 text-center text-sm text-muted-foreground {{ 'hidden' if users }}">
+      {{ t('no_users') }}
+    </li>
+  </ul>
+</section>
+
+<section class="mt-8 rounded-lg border border-destructive/30 bg-card shadow-soft p-4 sm:p-6">
+  <h2 class="text-lg font-semibold text-destructive flex items-center gap-2">
+    <i class="fas fa-triangle-exclamation"></i> {{ t('reset_title') }}
+  </h2>
+  <p class="mt-1 text-sm text-muted-foreground">{{ t('reset_text') }}</p>
+  <button type="button" class="btn btn-danger mt-4" data-open="resetDialog" {{ 'disabled' if db_error }}>
+    <i class="fas fa-trash-alt"></i> {{ t('reset_title') }}
+  </button>
+</section>
+
+{% for user in users %}
+<dialog id="passwordDialog{{ user.id }}" class="w-full max-w-md rounded-lg border border-border p-0 shadow-lg">
+  <form action="{{ url_for('set_password', user_id=user.id) }}" method="post" class="space-y-4 p-6" data-match>
+    {{ csrf() }}
+    <h2 class="text-xl font-semibold">{{ t('change_password') }}</h2>
+    <p class="text-sm text-muted-foreground -mt-2">{{ user.username }}</p>
+    {{ password_fields(t('new_password')) }}
+    {{ dialog_footer(t('save'), 'fa-save') }}
+  </form>
+</dialog>
+{% endfor %}
+
+<dialog id="addUserDialog" class="w-full max-w-md rounded-lg border border-border p-0 shadow-lg">
+  <form action="{{ url_for('add_user') }}" method="post" class="space-y-4 p-6" data-match>
+    {{ csrf() }}
+    <h2 class="text-xl font-semibold">{{ t('add_user') }}</h2>
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('username') }}
+      <input class="field" name="username" autocomplete="off" autocapitalize="none" spellcheck="false" required />
+    </label>
+    {{ password_fields(t('password')) }}
+    {{ dialog_footer(t('add_user'), 'fa-user-plus') }}
+  </form>
+</dialog>
+
+<dialog id="adminDialog" class="w-full max-w-md rounded-lg border border-border p-0 shadow-lg">
+  <form action="{{ url_for('change_admin') }}" method="post" class="space-y-4 p-6" data-match>
+    {{ csrf() }}
+    <h2 class="text-xl font-semibold">{{ t('admin_login') }}</h2>
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('current_password') }}
+      <input class="field" type="password" name="current_password" autocomplete="current-password" required />
+    </label>
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('username') }}
+      <input class="field" name="username" value="{{ admin.username }}" autocomplete="username"
+             autocapitalize="none" spellcheck="false" required />
+    </label>
+    {{ password_fields(t('new_password')) }}
+    {{ dialog_footer(t('save'), 'fa-save') }}
+  </form>
+</dialog>
+
+<dialog id="resetDialog" class="w-full max-w-md rounded-lg border border-border p-0 shadow-lg">
+  <form action="{{ url_for('reset_database') }}" method="post" class="space-y-4 p-6">
+    {{ csrf() }}
+    <h2 class="text-xl font-semibold text-destructive">{{ t('reset_title') }}</h2>
+    <p class="text-sm text-muted-foreground">{{ t('reset_text') }}</p>
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('reset_confirm') }}
+      <input class="field" name="confirm" autocomplete="off" pattern="RESET" required id="resetConfirm" />
+    </label>
+    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t border-border pt-4">
+      <button type="button" class="btn btn-outline" data-close>{{ t('cancel') }}</button>
+      <button type="submit" class="btn btn-danger" id="resetButton" disabled>
+        <i class="fas fa-trash-alt"></i> {{ t('reset_title') }}
+      </button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const search = document.getElementById("search");
+  search.addEventListener("input", () => {
+    const term = search.value.toLowerCase().trim();
+    let shown = 0;
+    document.querySelectorAll(".user-row").forEach((row) => {
+      const match = row.dataset.search.includes(term);
+      row.hidden = !match;
+      shown += match;
+    });
+    document.getElementById("no-users").classList.toggle("hidden", shown > 0);
+  });
+
+  document.querySelectorAll("form[data-confirm]").forEach((form) =>
+    form.addEventListener("submit", (e) => {
+      if (!confirm(form.dataset.confirm)) e.preventDefault();
+    })
+  );
+
+  // "Confirm password" must match before the form can be sent.
+  const differ = {{ t('passwords_differ')|tojson }};
+  document.querySelectorAll("form[data-match]").forEach((form) => {
+    const confirmField = form.elements.confirm_password;
+    const check = () =>
+      confirmField.setCustomValidity(confirmField.value === form.elements.password.value ? "" : differ);
+    form.elements.password.addEventListener("input", check);
+    confirmField.addEventListener("input", check);
+  });
+
+  const resetConfirm = document.getElementById("resetConfirm");
+  resetConfirm.addEventListener("input", () => {
+    document.getElementById("resetButton").disabled = resetConfirm.value !== "RESET";
+  });
+</script>
+{% endblock %}

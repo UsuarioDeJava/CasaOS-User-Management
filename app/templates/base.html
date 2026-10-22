@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="{{ 'pt-BR' if lang == 'pt_br' else 'en' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ t('app_title') }}</title>
+    <script>
+      // Before the page paints: saved theme, else the system's.
+      (function () {
+        let theme = null;
+        try { theme = localStorage.getItem("theme"); } catch (e) {}
+        if (theme === "dark" || (!theme && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
+  </head>
+  <body class="min-h-screen">
+    <div class="flex min-h-screen flex-col">
+      <header class="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-sm">
+        <div class="flex h-16 items-center gap-2 px-4 sm:px-6 max-w-5xl mx-auto">
+          <i class="fas fa-users-gear text-primary text-xl"></i>
+          <span class="font-bold text-lg truncate">{{ t('app_title') }}</span>
+          <div class="ml-auto flex items-center gap-2">
+            <button id="theme-toggle" type="button" class="btn btn-outline btn-icon"
+                    title="{{ t('dark') }} / {{ t('light') }}">
+              <i class="fas fa-moon dark:hidden"></i>
+              <i class="fas fa-sun hidden dark:inline"></i>
+            </button>
+            {% if logged_in %}
+            <button type="button" class="btn btn-outline btn-icon" data-open="adminDialog"
+                    title="{{ t('admin_login') }}">
+              <i class="fas fa-key"></i>
+            </button>
+            <form action="{{ url_for('logout') }}" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-outline btn-icon" title="{{ t('logout') }}">
+                <i class="fas fa-right-from-bracket"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </header>
+
+      <div id="toasts" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
+        {% for category, text in messages() %}
+        <div role="status"
+             class="toast rounded-lg border px-4 py-3 shadow-soft text-sm flex items-start gap-3
+                    {{ 'bg-destructive text-destructive-foreground border-transparent' if category == 'error'
+                       else 'bg-card text-card-foreground border-border' }}">
+          <i class="fas {{ 'fa-circle-exclamation' if category == 'error' else 'fa-circle-check text-success' }} mt-0.5"></i>
+          <span class="flex-1">{{ text }}</span>
+          <button type="button" onclick="this.parentElement.remove()" aria-label="OK">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <main class="flex-1">
+        <div class="px-4 py-6 sm:px-6 max-w-5xl mx-auto">{% block content %}{% endblock %}</div>
+      </main>
+    </div>
+
+    <script>
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const dark = document.documentElement.classList.toggle("dark");
+        try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
+      });
+      document.querySelectorAll("[data-open]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.getElementById(button.dataset.open).showModal();
+        });
+      });
+      document.querySelectorAll("dialog").forEach((dialog) => {
+        dialog.querySelectorAll("[data-close]").forEach((b) =>
+          b.addEventListener("click", () => dialog.close())
+        );
+        dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+        dialog.addEventListener("close", () => dialog.querySelector("form")?.reset());
+      });
+      // Success messages go away by themselves; errors stay until closed.
+      document.querySelectorAll(".toast:not(.bg-destructive)").forEach((toast) =>
+        setTimeout(() => toast.remove(), 5000)
+      );
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

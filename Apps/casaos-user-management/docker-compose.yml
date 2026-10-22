@@ -1,0 +1,105 @@
+name: casaos-user-management
+services:
+  casaos-user-management:
+    container_name: casaos-user-management
+    image: ghcr.io/usuariodejava/casaos-user-management:latest
+    environment:
+      # First login of this page. Can also be changed later in the page itself
+      # (key button); whichever change is the most recent wins.
+      ADMIN_USERNAME: casaos
+      ADMIN_PASSWORD: casaos
+      # "true" forgets the login set in the page and goes back to the two above.
+      RESET_ADMIN: "false"
+    ports:
+      - target: 5000
+        published: "5000"
+        protocol: tcp
+    volumes:
+      # The CasaOS user database (user.db).
+      - type: bind
+        source: /var/lib/casaos/db
+        target: /var/lib/casaos/db
+      # This app's own login and session key.
+      - type: bind
+        source: /DATA/AppData/casaos-user-management
+        target: /data
+      # Host D-Bus: shows the CasaOS user service state and restarts it after
+      # "Reset database". Everything else works without it.
+      - type: bind
+        source: /var/run/dbus/system_bus_socket
+        target: /var/run/dbus/system_bus_socket
+    security_opt:
+      # The default AppArmor profile blocks D-Bus calls to the host's systemd.
+      - apparmor:unconfined
+    network_mode: bridge
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 32M
+    x-casaos:
+      envs:
+        - container: ADMIN_USERNAME
+          description:
+            en_us: Username of this page (not of CasaOS)
+            pt_br: Usuário desta página (não do CasaOS)
+        - container: ADMIN_PASSWORD
+          description:
+            en_us: Password of this page (not of CasaOS)
+            pt_br: Senha desta página (não do CasaOS)
+        - container: RESET_ADMIN
+          description:
+            en_us: '"true" forgets the login changed in the page'
+            pt_br: '"true" esquece o login alterado na página'
+      volumes:
+        - container: /var/lib/casaos/db
+          description:
+            en_us: CasaOS user database
+            pt_br: Banco de usuários do CasaOS
+        - container: /data
+          description:
+            en_us: Login of this app
+            pt_br: Login deste app
+        - container: /var/run/dbus/system_bus_socket
+          description:
+            en_us: Host D-Bus (CasaOS user service)
+            pt_br: D-Bus do host (serviço de usuários do CasaOS)
+      ports:
+        - container: "5000"
+          description:
+            en_us: Web UI
+            pt_br: Interface web
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm
+    - arm64
+  main: casaos-user-management
+  store_app_id: casaos-user-management
+  category: Utilities
+  author: UsuarioDeJava
+  developer: UsuarioDeJava
+  icon: https://cdn.jsdelivr.net/gh/UsuarioDeJava/casaos-user-management@main/icon.png
+  description:
+    en_us: Add, remove and change the password of CasaOS users, from a web page with its own login. Useful when you forgot the CasaOS password. Based on BigBearCasaOS User Management.
+    pt_br: Adicione, remova e troque a senha dos usuários do CasaOS, numa página web com login próprio. Útil quando você esqueceu a senha do CasaOS. Baseado no BigBearCasaOS User Management.
+  tagline:
+    en_us: Manage CasaOS users
+    pt_br: Gerencie os usuários do CasaOS
+  title:
+    en_us: CasaOS User Management
+    pt_br: Gerenciador de Usuários do CasaOS
+  tips:
+    before_install:
+      en_us: |
+        The first login of this page is **casaos / casaos** (the ADMIN_USERNAME / ADMIN_PASSWORD variables). Change it in the page (key button) after the first login.
+
+        This app can change every CasaOS account: keep port 5000 inside your local network.
+      pt_br: |
+        O primeiro login desta página é **casaos / casaos** (as variáveis ADMIN_USERNAME / ADMIN_PASSWORD). Troque na própria página (botão da chave) depois do primeiro login.
+
+        Este app pode alterar todas as contas do CasaOS: mantenha a porta 5000 apenas na sua rede local.
+  port_map: "5000"
+  scheme: http
+  index: /

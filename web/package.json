@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "description": "Build-time only: compiles the web UI CSS and ships the icon font (see Dockerfile).",
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "6.7.2",
+    "tailwindcss": "3.4.17"
+  }
+}

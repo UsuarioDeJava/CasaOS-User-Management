@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block content %}
+<div class="flex justify-center pt-8 sm:pt-16">
+  <form method="post" class="w-full max-w-sm rounded-lg border border-border bg-card p-6 shadow-soft space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <h1 class="text-2xl font-semibold tracking-tight">{{ t('sign_in') }}</h1>
+    {% if error %}
+    <p role="alert" class="rounded-md bg-destructive/10 text-destructive px-3 py-2 text-sm">
+      <i class="fas fa-circle-exclamation mr-1"></i> {{ error }}
+    </p>
+    {% endif %}
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('username') }}
+      <input class="field" name="username" autocomplete="username" autocapitalize="none"
+             spellcheck="false" required autofocus value="{{ request.form.get('username', '') }}" />
+    </label>
+    <label class="grid gap-2 text-sm font-medium">
+      {{ t('password') }}
+      <input class="field" type="password" name="password" autocomplete="current-password" required />
+    </label>
+    <button type="submit" class="btn btn-primary w-full">
+      <i class="fas fa-right-to-bracket"></i> {{ t('sign_in') }}
+    </button>
+  </form>
+</div>
+{% endblock %}
